@@ -277,7 +277,7 @@ procedure validateRecord private:
     for first tmp#[app.component,AblTempTable,PascalCase]# no-lock:
 @[app.fields,isMandatory&ablFixedValue=&!isAuto]@
         ?[isFirst]?if?[end]??[!isFirst]?or?[end]? tmp#[app.component,AblTempTable,PascalCase]#.#[field]# = ?
-        or tmp#[app.component,AblTempTable,PascalCase]#.#[field]# = ?[ablType=character]?""?[end]??[ablType=logical]???[end]??[!ablType=character&!ablType=logical]?0?[end]?
+        ?[!ablType=date]?or?[end]? ?[!ablType=date]?tmp#[app.component,AblTempTable,PascalCase]#.#[field]# =?[end]? ?[ablType=character]?""?[end]??[ablType=logical]???[end]??[!ablType=character&!ablType=logical&!ablType=date]?0?[end]?
 @[end]@
         then do:
             run insertOtherError(
@@ -338,7 +338,12 @@ procedure removeRecord:
         ?[isFirst]?where?[end]??[!isFirst]?  and ?[end]? #[app.table]#.#[field]# = #[field]#-par
 @[end]@
               exclusive-lock:
-        delete #[app.table]#.
+        delete #[app.table]# no-error.
+        if error-status:error
+        then do:
+            run insertErrorProgress (input "", input "", input-output table rowErrors).
+            return "NOK".
+        end.
     end.
 
 end.
